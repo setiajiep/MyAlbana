@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100vh;
+            /* Tinggi akan diatur oleh JavaScript untuk akurasi di perangkat seluler */
             overflow: hidden;
         }
         #root {
@@ -123,8 +123,6 @@
                 }
 
                 if (userFound) {
-                    // **PERBAIKAN UTAMA:** Membuat URL yang valid dengan mengambil URL saat ini
-                    // dan menambahkan parameter. Ini akan mencegah galat "not a valid URL".
                     const baseUrl = window.location.href.split('?')[0];
                     const newUrl = baseUrl + '?status=terautentikasi';
                     window.location.href = newUrl;
@@ -143,9 +141,22 @@
             }
         }
 
+        // **PERBAIKAN TAMPILAN SELULER**
+        // Fungsi untuk menyesuaikan tinggi halaman dengan viewport yang terlihat
+        function adjustHeight() {
+            // Mengatur tinggi body agar sesuai dengan tinggi jendela yang sebenarnya
+            document.body.style.height = window.innerHeight + 'px';
+        }
+
+
         // === INISIALISASI HALAMAN (ROUTER SEDERHANA) ===
         // Skrip ini berjalan saat halaman pertama kali dimuat atau setelah dialihkan
         document.addEventListener('DOMContentLoaded', () => {
+            // Menyesuaikan tinggi halaman saat pertama kali dimuat
+            adjustHeight();
+            // Menambahkan listener untuk menyesuaikan tinggi saat ukuran jendela berubah (mis. rotasi layar)
+            window.addEventListener('resize', adjustHeight);
+
             const urlParams = new URLSearchParams(window.location.search);
             // Periksa apakah parameter 'status' ada dan nilainya 'terautentikasi'
             if (urlParams.get('status') === 'terautentikasi') {
