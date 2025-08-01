@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Web Anda</title>
+    <!-- Memuat Tailwind CSS untuk styling dasar -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Menggunakan font Inter untuk tampilan yang lebih modern */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Memastikan iframe mengisi seluruh viewport tanpa ada margin atau scrollbar */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Mencegah scrollbar pada halaman utama */
+        }
+        iframe {
+            width: 100vw; /* 100% dari lebar viewport */
+            height: 100vh; /* 100% dari tinggi viewport */
+            border: none; /* Menghilangkan border default iframe */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- 
+      Iframe ini akan menampilkan aplikasi AppSheet Anda.
+      Atribut 'src' diisi dengan URL aplikasi AppSheet Anda.
+    -->
+    <iframe 
+        src="https://www.appsheet.com/start/ca0f8111-bce2-4eb0-aca4-fdd9feed4728" 
+        title="Aplikasi AppSheet yang Disematkan">
+    </iframe>
+
+</body>
+</html>
