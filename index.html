@@ -16,24 +16,46 @@
         html, body {
             margin: 0;
             padding: 0;
-            height: 100vh; /* Mengatur tinggi ke 100% tinggi viewport */
+            width: 100%;
+            height: 100%;
             overflow: hidden; /* Mencegah scrollbar pada halaman utama */
+        }
+        /* Mengatur iframe agar fleksibel */
+        iframe {
+            flex-grow: 1;
+            border: none;
         }
     </style>
 </head>
 <!-- Menggunakan Flexbox untuk layout. Body menjadi container flex. -->
-<body class="bg-gray-100 flex">
+<body class="bg-gray-100 flex flex-col">
 
     <!-- 
       Iframe ini akan menampilkan aplikasi AppSheet Anda.
       Atribut 'src' diisi dengan URL aplikasi AppSheet Anda.
-      Kelas 'flex-grow' membuat iframe mengisi semua ruang yang tersedia di dalam container flex.
     -->
     <iframe 
-        class="w-full h-full border-none"
+        id="appsheet-iframe"
         src="https://www.appsheet.com/start/ca0f8111-bce2-4eb0-aca4-fdd9feed4728" 
         title="Aplikasi AppSheet yang Disematkan">
     </iframe>
+
+    <script>
+        // Fungsi untuk mengatur tinggi iframe agar sesuai dengan tinggi jendela browser
+        function setAppHeight() {
+            const iframe = document.getElementById('appsheet-iframe');
+            if (iframe) {
+                // Menggunakan window.innerHeight untuk mendapatkan tinggi viewport yang sebenarnya
+                document.body.style.height = window.innerHeight + 'px';
+            }
+        }
+
+        // Panggil fungsi saat halaman pertama kali dimuat
+        window.addEventListener('load', setAppHeight);
+
+        // Panggil fungsi saat ukuran jendela diubah (misalnya saat rotasi layar)
+        window.addEventListener('resize', setAppHeight);
+    </script>
 
 </body>
 </html>
