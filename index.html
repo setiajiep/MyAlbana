@@ -3,58 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Web Anda</title>
-    <!-- Memuat Tailwind CSS untuk styling dasar -->
+    <title>Login</title>
+    <!-- Memuat Tailwind CSS untuk styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Menggunakan font Inter untuk tampilan yang lebih modern */
-        body {
+        body, html {
             font-family: 'Inter', sans-serif;
-        }
-        /* Memastikan html dan body mengisi seluruh viewport tanpa ada margin atau scrollbar */
-        html, body {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
-            overflow: hidden; /* Mencegah scrollbar pada halaman utama */
+            height: 100vh;
+            overflow: hidden;
         }
-        /* Mengatur iframe agar fleksibel */
-        iframe {
-            flex-grow: 1;
-            border: none;
+        #root {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
-<!-- Menggunakan Flexbox untuk layout. Body menjadi container flex. -->
-<body class="bg-gray-100 flex flex-col">
+<body class="bg-gray-100">
 
-    <!-- 
-      Iframe ini akan menampilkan aplikasi AppSheet Anda.
-      Atribut 'src' diisi dengan URL aplikasi AppSheet Anda.
-    -->
-    <iframe 
-        id="appsheet-iframe"
-        src="https://www.appsheet.com/start/ca0f8111-bce2-4eb0-aca4-fdd9feed4728" 
-        title="Aplikasi AppSheet yang Disematkan">
-    </iframe>
+    <!-- Wadah ini akan diisi secara dinamis oleh skrip di bawah -->
+    <div id="root"></div>
 
     <script>
-        // Fungsi untuk mengatur tinggi iframe agar sesuai dengan tinggi jendela browser
-        function setAppHeight() {
-            const iframe = document.getElementById('appsheet-iframe');
-            if (iframe) {
-                // Menggunakan window.innerHeight untuk mendapatkan tinggi viewport yang sebenarnya
-                document.body.style.height = window.innerHeight + 'px';
+        // URL untuk mengambil data dari Google Sheet dalam format CSV.
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/117nAZDBlNJmXRo3kRuEXdRo18kcwLEPU1SJ1C-hgVIU/gviz/tq?tqx=out:csv&sheet=Sheet1';
+
+        // === TEMPLATE HTML UNTUK SETIAP HALAMAN ===
+        
+        // Template untuk Halaman 1 (Login)
+        const loginPageHTML = `
+            <div class="flex items-center justify-center w-full h-full p-4">
+                <div class="w-full max-w-sm bg-white p-8 rounded-xl shadow-lg animate-fade-in">
+                    <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">Selamat Datang</h1>
+                    <p class="text-center text-gray-500 mb-6">Silakan masuk untuk melanjutkan</p>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="username" name="username" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan email Anda">
+                        </div>
+                        <div class="mb-6">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan password Anda">
+                        </div>
+                        <p id="error-message" class="text-red-500 text-sm text-center mb-4 hidden"></p>
+                        <button type="submit" id="login-button" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                            Masuk
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <style> @keyframes fade-in { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } } .animate-fade-in { animation: fade-in 0.3s ease-out; } </style>
+        `;
+
+        // Template untuk Halaman 2 (Aplikasi AppSheet)
+        const appPageHTML = `
+            <iframe 
+                class="w-full h-full border-none"
+                src="https://www.appsheet.com/start/ca0f8111-bce2-4eb0-aca4-fdd9feed4728" 
+                title="Aplikasi AppSheet yang Disematkan"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                allow="storage-access-by-user-activation; clipboard-write;">
+            </iframe>
+        `;
+
+        // === FUNGSI UTAMA ===
+        const rootElement = document.getElementById('root');
+
+        // Fungsi untuk menampilkan halaman login
+        function showLoginPage() {
+            if (rootElement) {
+                document.title = 'Login';
+                rootElement.innerHTML = loginPageHTML;
+                document.getElementById('login-form').addEventListener('submit', handleLoginAttempt);
             }
         }
 
-        // Panggil fungsi saat halaman pertama kali dimuat
-        window.addEventListener('load', setAppHeight);
+        // Fungsi untuk menampilkan halaman aplikasi
+        function showAppPage() {
+            if (rootElement) {
+                document.title = 'Aplikasi Anda';
+                rootElement.innerHTML = appPageHTML;
+            }
+        }
 
-        // Panggil fungsi saat ukuran jendela diubah (misalnya saat rotasi layar)
-        window.addEventListener('resize', setAppHeight);
+        // Fungsi yang menangani percobaan login
+        async function handleLoginAttempt(event) {
+            event.preventDefault();
+            const loginButton = document.getElementById('login-button');
+            const errorMessage = document.getElementById('error-message');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Memeriksa...';
+            errorMessage.classList.add('hidden');
+
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) throw new Error('Gagal mengambil data dari Google Sheet.');
+                
+                const csvText = await response.text();
+                const rows = csvText.trim().split(/\r?\n/).slice(1);
+                let userFound = false;
+
+                for (const row of rows) {
+                    if (row.trim() === '') continue;
+                    const columns = row.split(',').map(col => col.trim().replace(/^"|"$/g, ''));
+                    if (columns.length > 1) {
+                        const sheetUser = columns[0];
+                        const sheetPass = columns[1];
+                        if (sheetUser.toLowerCase() === username.toLowerCase() && sheetPass === password) {
+                            userFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (userFound) {
+                    // **PERBAIKAN UTAMA:** Membuat URL yang valid dengan mengambil URL saat ini
+                    // dan menambahkan parameter. Ini akan mencegah galat "not a valid URL".
+                    const baseUrl = window.location.href.split('?')[0];
+                    const newUrl = baseUrl + '?status=terautentikasi';
+                    window.location.href = newUrl;
+                } else {
+                    errorMessage.textContent = 'Email atau password salah.';
+                    errorMessage.classList.remove('hidden');
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Masuk';
+                }
+            } catch (error) {
+                console.error('Error saat login:', error);
+                errorMessage.textContent = 'Terjadi kesalahan. Pastikan Sheet dapat diakses publik.';
+                errorMessage.classList.remove('hidden');
+                loginButton.disabled = false;
+                loginButton.textContent = 'Masuk';
+            }
+        }
+
+        // === INISIALISASI HALAMAN (ROUTER SEDERHANA) ===
+        // Skrip ini berjalan saat halaman pertama kali dimuat atau setelah dialihkan
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            // Periksa apakah parameter 'status' ada dan nilainya 'terautentikasi'
+            if (urlParams.get('status') === 'terautentikasi') {
+                // Jika ya, pengguna sudah login. Tampilkan halaman aplikasi.
+                showAppPage();
+            } else {
+                // Jika tidak, tampilkan halaman login.
+                showLoginPage();
+            }
+        });
     </script>
 
 </body>
